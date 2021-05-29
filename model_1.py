@@ -18,7 +18,8 @@ class ModelBasic:
         self.deposit = deposit
         self.code = code
         self.type = type
-        self.price_data = get_data(code=self.code, type='day')
+        self.price_data = get_data(code=self.code, type=type)
+        print(len(self.price_data))
         self.stock = {self.code : 0, 'avg_price' : 0}  # '005930' : '5' -> Bought Samsung 5EA
         self.MA_line = [0, 0, 0, 0, 0, 0]  # 5, 10, 15, 30, 60, 120
 
@@ -26,8 +27,8 @@ class ModelBasic:
         self.price_by_date = []
         for data in reversed(self.price_data):
             if self.type == 'day':
-                date = data['published_date'][:10]
-            self.price_by_date.append({'open': data['start'], 'close': data['close'], 'date':date})
+                data['date'] = data['date'][:10]
+            self.price_by_date.append({'open': data['open'], 'close': data['close'], 'date':data['date']})
         for i in range(120):
             self.MA_line[DAY120] = self.MA_line[DAY120] + self.price_by_date[i]['close']
         for i in range(60):
@@ -74,10 +75,26 @@ class ModelBasic:
             MA_line_5 = self.MA_line[DAY5] / 5
 
             # print(MA_line_5, today_data['open'], today_data['close'])
-            if today_data['open'] < MA_line_5 and today_data['close'] > MA_line_5:
+            if yesterday_data['close'] < MA_line_5 and \
+               today_data['open'] > MA_line_5 and \
+               today_data['close'] > today_data['open']:
                 self.buy(today_data)
-            if today_data['open'] > MA_line_5 and today_data['close'] < MA_line_5:
+            elif today_data['open'] < MA_line_5 and today_data['close'] > MA_line_5:
+                self.buy(today_data)
+            elif yesterday_data['close'] > MA_line_5 and \
+                today_data['open'] < MA_line_5 and \
+                today_data['close'] < today_data['close']:
                 self.sell(today_data)
+            elif today_data['open'] > MA_line_5 and today_data['close'] < MA_line_5:
+                self.sell(today_data)
+            
+            if i % 300 == 0:
+                Dtemp = self.stock[self.code] * today_data['close'] + self.deposit
+                Rtemp = Dtemp - self.capital
+                print('[Middle Result]  Deposit : {}, Revenue : {} '.format(Dtemp, Rtemp))
+                print()
+
+        self.sell(today_data) # 안 팔아버렸을 수 있음
 
         revenue = self.deposit - self.capital
         earning_rate = ((self.deposit/self.capital)-1)*100
@@ -98,5 +115,5 @@ class ModelBasic:
 
 
 if __name__ == "__main__":
-    m = ModelBasic(deposit=1*BAEK, code='069500', type='day')
+    m = ModelBasic(deposit=1*BAEK, code='005930', type='day')
     m.run()

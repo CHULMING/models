@@ -1,23 +1,48 @@
 import requests
 import json
-
+import time
+RETRY_COUNT = 5
+BACKOFF = 0.5
 def post_data(payload_data, type='minute'):
-    url = 'http://localhost:8080/api/' + type
-    print('start to post data\n{}'.format(url))
-    r = requests.post(url, data=payload_data)
-    print('done\n')
+    count = 0
+    while(count<RETRY_COUNT):
+        try:
+            url = 'http://localhost:8080/api/' + type
+            print('start to post data\n{}'.format(url))
+            r = requests.post(url, data=payload_data)
+            print('done\n')
+            break
+        except Exception as e:
+            print(e)
+            count = count + 1
+            time.sleep(BACKOFF * count)
+    if count >= RETRY_COUNT:
+        print("POST failed")
+        time.sleep(10)
 
 def get_data(code, type='minute'):
-    url = 'http://localhost:8080/api/' + type + '/' + code
-    print('start to get data\n{}'.format(url))
-    r = requests.get(url).json()
-    print('done\n')
+    
+    count = 0
+    while(count<RETRY_COUNT):
+        try:
+            url = 'http://localhost:8080/api/' + type + '/' + code
+            print('start to get data\n{}'.format(url))
+            r = requests.get(url).json()
+            print('done\n')
+            break
+        except Exception as e:
+            print(e)
+            count = count + 1
+            time.sleep(BACKOFF * count)
+    if count >= RETRY_COUNT:
+        print("GET failed")
+        time.sleep(10)
     return r
 
 if __name__ == "__main__":
     data = {
         'code': '005930', 
-        'start': 40000, 
+        'open': 40000, 
         'low': 45000, 
         'high': 55000, 
         'close': 49000,

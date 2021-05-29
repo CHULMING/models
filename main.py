@@ -9,5 +9,5 @@ if __name__ == "__main__":
     k = Kiwoom()
     k.comm_connect()
     print(k.get_connect_state())
-    # k.rq_minute_data(code='005930')
-    k.rq_day_data(code='069500')
+    #k.rq_minute_data(code='069500')
+    k.rq_day_data(code='005930')
