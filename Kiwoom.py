@@ -10,10 +10,13 @@ from RestApi import post_data
 TR_INTERVAL = 0.2
 
 class Kiwoom(QAxWidget):
-    def __init__(self):
+    def __init__(self, sRQName):
         super().__init__()
         self._create_kiwoom_instance()
         self._set_signal_slots()
+        self.comm_connect()
+
+        self.sRQName = sRQName
 
     def _create_kiwoom_instance(self):
         self.setControl("KHOPENAPI.KHOpenAPICtrl.1")
@@ -89,7 +92,7 @@ class Kiwoom(QAxWidget):
     
     def send_order(self, rqname, screen_no, acc_no, order_type, code, quantity, price, hoga, order_no):
         self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)",
-                          [rqname, screen_no, acc_no, order_type, code, quantity, price, hoga, order_no])
+                          [self.sRQName, screen_no, acc_no, order_type, code, quantity, price, hoga, order_no])
 
     def get_chejan_data(self, fid):
         ret = self.dynamicCall("GetChejanData(int)", fid)
@@ -101,65 +104,39 @@ class Kiwoom(QAxWidget):
         print(self.get_chejan_data(302))
         print(self.get_chejan_data(900))
         print(self.get_chejan_data(901))
-    
-    def rq_minute_data(self, code):
-        self.code = code
-        self.set_input_value('종목코드', self.code)
-        self.set_input_value('틱범위', '1')
-        self.set_input_value('수정주가구분', '0')
-        self.comm_rq_data('opt10080_req', 'opt10080', 0, "2000")
-        
-        for i in range(10):
-            time.sleep(0.2)
-            self.set_input_value('종목코드', self.code)
-            self.set_input_value('틱범위', '1')
-            self.set_input_value('수정주가구분', '0')
-            self.comm_rq_data('opt10080_req', 'opt10080', 2, "2000")
-
-        print("데이터 저장 성공")
-
-    def rq_day_data(self, code):
-        self.code = code
-        self.set_input_value('종목코드', self.code)
-        self.set_input_value('기준일자', '20210525')
-        self.set_input_value('수정주가구분', '0')
-        self.comm_rq_data('opt10081_req', 'opt10081', 0, "2001")
-
-        print("데이터 저장 성공")
 
     def _opt10080(self, rqname, trcode):
         data_cnt = self._get_repeat_cnt(trcode, rqname)
         payload_data = {}
+        data_cnt = 0
         for i in range(data_cnt):
-            if i % 100 == 0:
-                time.sleep(0.5)
             payload_data['code'] = self.code
-            payload_data['open'] = abs(int(self._comm_get_data(trcode, "", rqname, i, "시가")))
-            payload_data['close'] = abs(int(self._comm_get_data(trcode, "", rqname, i, "현재가")))
-            payload_data['low'] = abs(int(self._comm_get_data(trcode, "", rqname, i, "저가")))
-            payload_data['high'] = abs(int(self._comm_get_data(trcode, "", rqname, i, "고가")))
-            payload_data['volume'] = abs(int(self._comm_get_data(trcode, "", rqname, i, "거래량")))
-            date  = self._comm_get_data(trcode, "", rqname, i, "체결시간")[:-2]
-            payload_data['date'] = date[:4] + '-' + date[4:6] + '-' + date[6:8] + 'T'+ date[8:10] + ':' + date[10:12]
-            print('{} post done'.format(payload_data['date']))
-            post_data(payload_data, type='minute')
+            payload_data['start'] = int(self._comm_get_data(trcode, "", rqname, i, "시가"))
+            payload_data['close'] = int(self._comm_get_data(trcode, "", rqname, i, "현재가"))
+            payload_data['low'] = int(self._comm_get_data(trcode, "", rqname, i, "저가"))
+            payload_data['high'] = int(self._comm_get_data(trcode, "", rqname, i, "고가"))
+            payload_data['volume'] = int(self._comm_get_data(trcode, "", rqname, i, "거래량"))
+            time  = self._comm_get_data(trcode, "", rqname, i, "체결시간")[:-2]
+            payload_data['published_date'] = time[:4] + '-' + time[4:6] + '-' + time[6:8] + 'T'+ time[8:10] + ':' + time[10:12]
+            # post_data(payload_data, type='minute')
+        print('done ' + rqname + '  ' +trcode)
     
     def _opt10081(self, rqname, trcode):
         data_cnt = self._get_repeat_cnt(trcode, rqname)
         payload_data = {}
+        data_cnt = 0
         for i in range(data_cnt):
-            if i % 100 == 0:
-                time.sleep(0.5)
             payload_data['code'] = self.code
-            payload_data['open'] = abs(int(self._comm_get_data(trcode, "", rqname, i, "시가")))
-            payload_data['close'] = abs(int(self._comm_get_data(trcode, "", rqname, i, "현재가")))
-            payload_data['low'] = abs(int(self._comm_get_data(trcode, "", rqname, i, "저가")))
-            payload_data['high'] = abs(int(self._comm_get_data(trcode, "", rqname, i, "고가")))
-            payload_data['volume'] = abs(int(self._comm_get_data(trcode, "", rqname, i, "거래량")))
-            date  = self._comm_get_data(trcode, "", rqname, i, "일자")
-            payload_data['date'] = date[:4] + '-' + date[4:6] + '-' + date[6:8]
-            print('{} post done'.format(payload_data['date']))
-            post_data(payload_data, type='day')
+            payload_data['start'] = int(self._comm_get_data(trcode, "", rqname, i, "시가"))
+            payload_data['close'] = int(self._comm_get_data(trcode, "", rqname, i, "현재가"))
+            payload_data['low'] = int(self._comm_get_data(trcode, "", rqname, i, "저가"))
+            payload_data['high'] = int(self._comm_get_data(trcode, "", rqname, i, "고가"))
+            payload_data['volume'] = int(self._comm_get_data(trcode, "", rqname, i, "거래량"))
+            time  = self._comm_get_data(trcode, "", rqname, i, "일자")
+            payload_data['published_date'] = time[:4] + '-' + time[4:6] + '-' + time[6:8]
+            #print(payload_data)
+            # post_data(payload_data, type='day')
+        print('done ' + rqname + '  ' +trcode)
 
 
 if __name__ == "__main__":

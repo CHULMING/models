@@ -115,5 +115,5 @@ class ModelBasic:
 
 
 if __name__ == "__main__":
-    m = ModelBasic(deposit=1*BAEK, code='005930', type='day')
+    m = ModelBasic(deposit=1*BAEK, code='256150', type='minute')
     m.run()
