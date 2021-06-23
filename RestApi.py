@@ -7,10 +7,11 @@ def post_data(payload_data, type='minute'):
     count = 0
     while(count<RETRY_COUNT):
         try:
-            url = 'http://localhost:8080/api/' + type
+            url = 'http://localhost:3000/api/' + type
             print('start to post data\n{}'.format(url))
             r = requests.post(url, data=payload_data)
             print('done\n')
+            count = 0;
             break
         except Exception as e:
             print(e)
@@ -25,7 +26,7 @@ def get_data(code, type='minute'):
     count = 0
     while(count<RETRY_COUNT):
         try:
-            url = 'http://localhost:8080/api/' + type + '/' + code
+            url = 'http://localhost:3000/api/' + type + '/' + code
             print('start to get data\n{}'.format(url))
             r = requests.get(url).json()
             print('done\n')

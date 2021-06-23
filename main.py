@@ -9,7 +9,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     k = KiwoomWrapper()     
     
-    # k.get_data(code='005930', type='minute')
+    k.get_data_from_kiwoom(code='005380', type='day')
     # k.send_order('1', '1999', '8167335311', 1, '005930', 1, 0, '03', '')
 
 

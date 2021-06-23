@@ -108,34 +108,35 @@ class Kiwoom(QAxWidget):
     def _opt10080(self, rqname, trcode):
         data_cnt = self._get_repeat_cnt(trcode, rqname)
         payload_data = {}
-        data_cnt = 0
+        # data_cnt = 0
         for i in range(data_cnt):
             payload_data['code'] = self.code
-            payload_data['start'] = int(self._comm_get_data(trcode, "", rqname, i, "시가"))
+            payload_data['open'] = int(self._comm_get_data(trcode, "", rqname, i, "시가"))
             payload_data['close'] = int(self._comm_get_data(trcode, "", rqname, i, "현재가"))
             payload_data['low'] = int(self._comm_get_data(trcode, "", rqname, i, "저가"))
             payload_data['high'] = int(self._comm_get_data(trcode, "", rqname, i, "고가"))
             payload_data['volume'] = int(self._comm_get_data(trcode, "", rqname, i, "거래량"))
-            time  = self._comm_get_data(trcode, "", rqname, i, "체결시간")[:-2]
-            payload_data['published_date'] = time[:4] + '-' + time[4:6] + '-' + time[6:8] + 'T'+ time[8:10] + ':' + time[10:12]
+            date  = self._comm_get_data(trcode, "", rqname, i, "체결시간")[:-2]
+            payload_data['date'] = time[:4] + '-' + date[4:6] + '-' + date[6:8] + 'T'+ date[8:10] + ':' + date[10:12]
             # post_data(payload_data, type='minute')
         print('done ' + rqname + '  ' +trcode)
     
     def _opt10081(self, rqname, trcode):
         data_cnt = self._get_repeat_cnt(trcode, rqname)
         payload_data = {}
-        data_cnt = 0
+        # data_cnt = 0
         for i in range(data_cnt):
+            time.sleep(0.1)
             payload_data['code'] = self.code
-            payload_data['start'] = int(self._comm_get_data(trcode, "", rqname, i, "시가"))
+            payload_data['open'] = int(self._comm_get_data(trcode, "", rqname, i, "시가"))
             payload_data['close'] = int(self._comm_get_data(trcode, "", rqname, i, "현재가"))
             payload_data['low'] = int(self._comm_get_data(trcode, "", rqname, i, "저가"))
             payload_data['high'] = int(self._comm_get_data(trcode, "", rqname, i, "고가"))
             payload_data['volume'] = int(self._comm_get_data(trcode, "", rqname, i, "거래량"))
-            time  = self._comm_get_data(trcode, "", rqname, i, "일자")
-            payload_data['published_date'] = time[:4] + '-' + time[4:6] + '-' + time[6:8]
+            date  = self._comm_get_data(trcode, "", rqname, i, "일자")
+            payload_data['date'] = date[:4] + '-' + date[4:6] + '-' + date[6:8]
             #print(payload_data)
-            # post_data(payload_data, type='day')
+            post_data(payload_data, type='day')
         print('done ' + rqname + '  ' +trcode)
 
 

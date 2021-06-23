@@ -71,6 +71,7 @@ class ModelBasic:
         for i in range(5,len(self.price_by_date)):
             yesterday_data = self.price_by_date[i-1]
             today_data = self.price_by_date[i]
+
             self.MA_line[DAY5] = self.MA_line[DAY5] - self.price_by_date[i-5]['close'] + today_data['close']
             MA_line_5 = self.MA_line[DAY5] / 5
 
@@ -81,6 +82,7 @@ class ModelBasic:
                 self.buy(today_data)
             elif today_data['open'] < MA_line_5 and today_data['close'] > MA_line_5:
                 self.buy(today_data)
+
             elif yesterday_data['close'] > MA_line_5 and \
                 today_data['open'] < MA_line_5 and \
                 today_data['close'] < today_data['close']:
@@ -103,17 +105,6 @@ class ModelBasic:
         print('Revenue : {}, Earning rate : {}'.format(revenue, earning_rate))
             
 
-        
-        
-
-        
-         
-
-
-
-
-
-
 if __name__ == "__main__":
-    m = ModelBasic(deposit=1*BAEK, code='256150', type='minute')
+    m = ModelBasic(deposit=1*CHON, code='005380', type='day')
     m.run()
